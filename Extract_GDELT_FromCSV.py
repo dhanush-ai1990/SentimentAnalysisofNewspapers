@@ -13,7 +13,7 @@ from pandas import DataFrame, read_csv
 from urlparse import urlparse
 from bs4 import BeautifulSoup
 #Location of the csv file
-file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/20161031014501.24495.events.08.csv'
+file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/event11.csv'
 temp_arr=[]
 file_count=0
 
@@ -71,7 +71,7 @@ for link in gdelt_event_data[
 
         if len(temp_text)>2500:
 
-            f=open('/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/CODE_08/'+'_'+str(file_count)+'.txt','w')
+            f=open('/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/CODE_11/'+'_'+str(file_count)+'.txt','w')
             f.write(temp_text)
 
 
@@ -82,6 +82,7 @@ for link in gdelt_event_data[
         print "An error occured while rerieving the article link"
         #print format(err)
 
+print "done"
 
 # In[ ]:
 
