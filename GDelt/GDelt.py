@@ -11,8 +11,22 @@ import lxml.html as lh
 import os
 import urllib
 import zipfile
+import csv
+import xlrd
 
 gdelt_base_url = 'http://data.gdeltproject.org/events/'
+
+def getHeaders():
+    """
+    getHeaders
+
+    Provides the data schema
+    :returns: The schema of the data
+    """
+    fname = os.path.dirname(__file__) + '/CSV.header.fieldids.xlsx'
+    xl_workbook = xlrd.open_workbook(fname)
+    xl_sheet = xl_workbook.sheet_by_name("Sheet1")
+    return [ xl_sheet.row(ridx)[0].value for ridx in range(1, xl_sheet.nrows)]
 
 def loadGDeltFileList():
     """
@@ -120,6 +134,22 @@ def loadGDeltFile(fname, local_storage="./GDELT_REPOSITORY/"):
     if os.path.isfile(local_storage + fname) and not os.path.isfile(local_storage + "extracted/" + fname.replace(".zip", "")):
         z = zipfile.ZipFile(file=local_storage + fname, mode='r')
         z.extractall(path=local_storage + "extracted/")
+
+    if not os.path.isfile(local_storage + "extracted/" + fname.replace(".zip", "")):
+        return []  # Extracted file doesn't exists, just ignore it
+
+
+    # Parse the data
+
+    values = []
+    with open(local_storage + "extracted/" + fname.replace(".zip", "")) as f:
+        schema = getHeaders()
+        for l in f.read().split("\n"):
+            block = l.split("\t")
+            if len(block) == 1:
+                continue
+            values.append({h: (block[idx] if block[idx] != "" else None) for idx, h in enumerate(schema)})
+    return values
 
 def loadGDeltFiles(local_storage="./GDELT_REPOSITORY"):
     """
