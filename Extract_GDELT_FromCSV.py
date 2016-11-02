@@ -13,7 +13,7 @@ from pandas import DataFrame, read_csv
 from urlparse import urlparse
 from bs4 import BeautifulSoup
 #Location of the csv file
-file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/event11.csv'
+file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/event13.csv'
 temp_arr=[]
 file_count=0
 
@@ -57,7 +57,7 @@ for link in gdelt_event_data[
         temp_text=temp_text+str(gdelt_event_data['EventCode'][file_count])+"\n"
         temp_text=temp_text+str(gdelt_event_data['EventRootCode'][file_count])+"\n"
         #print link
-        html_page_stream=requests.get(link)
+        html_page_stream=requests.get(link,timeout = 30)
         html_page=BeautifulSoup(html_page_stream.content,'html.parser')
 
         html_p_data=html_page.find_all('p',text=True)
@@ -71,7 +71,7 @@ for link in gdelt_event_data[
 
         if len(temp_text)>2500:
 
-            f=open('/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/CODE_11/'+'_'+str(file_count)+'.txt','w')
+            f=open('/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/CODE_13/'+'_'+str(file_count)+'.txt','w')
             f.write(temp_text)
 
 
