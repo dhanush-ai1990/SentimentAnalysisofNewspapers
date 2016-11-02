@@ -10,7 +10,8 @@ from pandas import DataFrame, read_csv
 from urlparse import urlparse
 from bs4 import BeautifulSoup
 #Location of the csv file
-file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/event11.csv'
+file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/event20.csv'
+
 temp_arr=[]
 file_count=0
 
@@ -53,13 +54,12 @@ for link in gdelt_event_data[
         temp_text=link+"\n"
         temp_text=temp_text+str(gdelt_event_data['EventCode'][file_count])+"\n"
         temp_text=temp_text+str(gdelt_event_data['EventRootCode'][file_count])+"\n"
-        print link
 
         a = Article(link)
         a.download()
         a.parse()
 
-        f=open('/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/CODE_11/''_'+str(file_count)+'.txt','w')
+        f=open('/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/CODE_20/'+'_'+str(file_count)+'.txt','w')
         f.write(temp_text+a.text.encode("utf-8"))
         file_count+=1
         temp_df=None
