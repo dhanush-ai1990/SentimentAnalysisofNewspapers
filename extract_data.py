@@ -1,3 +1,5 @@
+import newspaper
+from newspaper import Article
 #File to extract links from the csv file
 import pandas as pd
 import urlparse
@@ -8,7 +10,7 @@ from pandas import DataFrame, read_csv
 from urlparse import urlparse
 from bs4 import BeautifulSoup
 #Location of the csv file
-file_loc='C:\Users\Dell PC\Desktop\GDELT Data\Express Intent to Cooperate(03)\\20161030191601.13715.events.csv'
+file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/event11.csv'
 temp_arr=[]
 file_count=0
 
@@ -42,25 +44,24 @@ count_data= pd.value_counts(link_data['host'].values,sort=True)
 
 #Parse the links provided from the dataframe and append the data to the existing dataframe
 #Create a new dataframe and write it to the file system
-for link in gdelt_event_data['SOURCEURL']:
+for link in gdelt_event_data[
+    'SOURCEURL']:
 
     try:
         temp_arr=[]
         temp_text=''
+        temp_text=link+"\n"
+        temp_text=temp_text+str(gdelt_event_data['EventCode'][file_count])+"\n"
+        temp_text=temp_text+str(gdelt_event_data['EventRootCode'][file_count])+"\n"
         print link
-        html_page_stream=requests.get(link)
-        html_page=BeautifulSoup(html_page_stream.content,'html.parser')
 
-        html_p_data=html_page.find_all('p',text=True)
-        print html_p_data
+        a = Article(link)
+        a.download()
+        a.parse()
 
-        for info in html_p_data:
-            temp_text+=info.string.encode('utf-8')
-        if len(temp_text)>50:
-            temp_arr.append(temp_text)
-            temp_df=DataFrame(data=temp_arr)
-            temp_df.to_csv('C:\Users\Dell PC\Desktop\GDELT Data\Express Intent to Cooperate(03)\Raw Files\\'+'_'+str(file_count)+'.txt')
-            file_count+=1
+        f=open('/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/CODE_11/''_'+str(file_count)+'.txt','w')
+        f.write(temp_text+a.text.encode("utf-8"))
+        file_count+=1
         temp_df=None
 
     except Exception as err:
