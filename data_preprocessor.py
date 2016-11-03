@@ -22,6 +22,7 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.naive_bayes import BernoulliNB
+from sklearn.naive_bayes import GaussianNB
 from scipy.sparse import coo_matrix
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
@@ -121,7 +122,7 @@ class DataPreprocessor(object):
             #print 'unable to open file folder Code_%s' %(self._code)
             return
         #print 'code:' + str(code_dict[i]._code)+ '  article_count:' + str(code_dict[i]._article_count)
-        print ""
+        
         
 def add_dict(main_dict,temp_dict):
     for domain in temp_dict:
@@ -167,13 +168,13 @@ print ""
 for i in range(1,21,1):
     if code_dict[i]._article_count < 1:
         continue
-    code_dict[i].FetchData(1,0,3500)
+    code_dict[i].FetchData(0,0,5500)
     total_feature_location += code_dict[i]._article_to_list
     total_label   += code_dict[i]._label 
 
 # Combines classes and Vectorize
 print "size of training documents" + str(len(total_label))
-cv = CountVectorizer(input ='total_feature_location',stop_words = {'english'},lowercase=True,analyzer ='word',binary =False,max_features =75000)
+cv = CountVectorizer(input ='total_feature_location',stop_words = {'english'},lowercase=True,analyzer ='word',binary =False)#,max_features =75000)
 X = cv.fit_transform(total_feature_location).toarray()
 vocab = np.array(cv.get_feature_names())
 feature_names = cv.get_feature_names()
@@ -191,7 +192,7 @@ print "Size of Train dataset is :" + str(len(y_train)) + "  " + str(len(X_train)
 print "Size of Test dataset is :" + str(len(y_test)) + "  " + str(len(X_test))
 
 alpha = 0.000001
-clf = BernoulliNB(alpha = alpha)
+#clf = BernoulliNB(alpha = alpha)
 clf = MultinomialNB(alpha = alpha)
 clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
@@ -200,8 +201,8 @@ print "train accuracy:" +str(clf.score(X_train,y_train))
 print "test accuracy:" +str(clf.score(X_test,y_test))
 
 print "*"
-print y_pred[1:10]
-print y_test[1:10]
+print y_pred[1:100]
+print y_test[1:100]
 #print ("For MultinomialNB:  " +'alpha=%f ,accuracy = %f' %(alpha, np.mean((y_test-y_pred)==0)))
 
 

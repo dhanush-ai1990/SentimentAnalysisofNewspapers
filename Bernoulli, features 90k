@@ -99,3 +99,49 @@ alpha 0.000001 ( 80 - 20), features 75k
 
 train accuracy:0.900819766771
 test accuracy:0.668513388735
+
+Varying training data size
+----------------------------
+
+
+Characters per articles : 3500
+train accuracy:0.898320895522
+test accuracy:0.682213930348
+
+
+cheacters per articles : 4500
+
+train accuracy:0.905753709971
+test accuracy:0.67429760666
+
+Features = full, characters per article = 3500
+
+train accuracy:0.910297239915
+test accuracy:0.694267515924
+
+featurs = full, characters per article = 4500
+
+train accuracy:0.905753709971
+test accuracy:0.67429760666
+
+features = full, characters per article = 1500
+
+train accuracy:0.901663557214
+test accuracy:0.682213930348
+
+
+Effect of Domain selection, means more articles of fixed character 3500( alpha fixed, features = max, length of characters = 3500)
+
+
+train accuracy:0.886726167869
+test accuracy:0.67046317388
+
+
+
+Gaussian NB:
+
+max features
+
+
+train accuracy:0.902487656665
+test accuracy:0.667046317388
