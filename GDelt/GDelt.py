@@ -6,13 +6,22 @@
 #
 # ------------------------------------------------
 
-import requests
-import lxml.html as lh
-import os
-import urllib
-import zipfile
 import csv
+import lxml.html as lh
+import math
+import os
+import requests
+import sys
+import threading
+import urllib
 import xlrd
+import zipfile
+
+from newspaper import Article
+from newspaper.article import ArticleException
+
+from progress.bar import Bar
+from time import sleep
 
 gdelt_base_url = 'http://data.gdeltproject.org/events/'
 
@@ -84,11 +93,62 @@ def loadGDeltFile(fname, local_storage="./GDELT_REPOSITORY/"):
             values.append({h: (block[idx] if block[idx] != "" else None) for idx, h in enumerate(schema)})
     return values
 
-def loadGDeltFiles(local_storage="./GDELT_REPOSITORY"):
-    """
-    loadGDeltFiles
+def loadLinks(GDeltData, threadCount=8):
+    """Downloads the links and provides the downloaded content for each URL
 
-    :local_storage: where the downloaded files are stored
-    :returns: csv for each file
+    :GDeltData: The dataset for gdelt, obtained from loadGDeltFile
+    :threadCount: Number of threads to download and parse links over
+    :returns: url-content mapping
+
     """
-    pass
+
+    def chunkify(links, threads):
+        """
+        Breaks the list into sub-components that can be fed into threads
+        """
+        return [links[i:i+math.ceil(len(links) / threads)]
+                for i in range(0, len(links), math.ceil(len(links) / threads))]
+
+    def handleLinks(links, results, index):
+        """
+        downloads, parses, and inserts links into the results
+        """
+        for linkid, link in enumerate(links):
+            for url in link:
+                link[url].download()
+                completed[index] += 1
+                if link[url].html == '':
+                    break   # A server error occured, don't parse, it won't work
+                link[url].parse()
+        results[index] = [{key: link[key].text} for link in links for key in link]
+
+    # Only process unique links
+    unique_links = { d['SOURCEURL'] for d in GDeltData }
+    links = [{link: Article(link)} for link in unique_links]
+    linklists = chunkify(links, threadCount)
+
+    print("Loading {0} links".format(len(links)))
+    bar = Bar("Processing:", max=len(links))
+
+    threadCount = threadCount if len(linklists) > threadCount else len(linklists)
+
+    results = [None] * threadCount
+    threads = [None] * threadCount
+    completed =  [0] * threadCount
+
+    for i in range(threadCount):
+        threads[i] = threading.Thread(target=handleLinks, args=(linklists[i], results, i))
+        threads[i].start()
+
+    current_total = sum(completed)
+    while sum(completed) < len(links):
+        sleep(0.1)
+        tmp_completed = sum(completed)
+        bar.next(sum(completed) - current_total)
+        if sum(completed) >= len(links):
+            break
+        current_total = tmp_completed
+    bar.finish()
+    for thread in threads:
+        thread.join()
+    return {key: link[key] for resultsset in results for link in resultsset for key in link}
