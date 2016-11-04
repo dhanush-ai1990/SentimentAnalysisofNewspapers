@@ -19,11 +19,15 @@ import zipfile
 
 from newspaper import Article
 from newspaper.article import ArticleException
+import newspaper.configuration
 
 from progress.bar import Bar
 from time import sleep
 
+from . import Utils
+
 gdelt_base_url = 'http://data.gdeltproject.org/events/'
+
 
 def getHeaders():
     """
@@ -93,39 +97,46 @@ def loadGDeltFile(fname, local_storage="./GDELT_REPOSITORY/"):
             values.append({h: (block[idx] if block[idx] != "" else None) for idx, h in enumerate(schema)})
     return values
 
-def loadLinks(GDeltData, threadCount=8):
-    """Downloads the links and provides the downloaded content for each URL
 
-    :GDeltData: The dataset for gdelt, obtained from loadGDeltFile
+def downloadLinks(GDeltData, threadCount=8, local_storage="./GDELT_REPOSITORY/"):
+    """Downloads the links and saves the files to disk
+    It provides the url-filename mapping as a result
+
+    :GDeltData: The dataset for gdelt obtained from loadGDeltFile
     :threadCount: Number of threads to download and parse links over
-    :returns: url-content mapping
+    :local_storage: Where to save the article data
+    :returns: url-filename mapping
 
     """
 
-    def chunkify(links, threads):
-        """
-        Breaks the list into sub-components that can be fed into threads
-        """
-        return [links[i:i+math.ceil(len(links) / threads)]
-                for i in range(0, len(links), math.ceil(len(links) / threads))]
+    linkDownloadConfig = newspaper.configuration.Configuration()
+    linkDownloadConfig.fetch_images = False
 
     def handleLinks(links, results, index):
         """
         downloads, parses, and inserts links into the results
         """
+        urlmap = {}
         for linkid, link in enumerate(links):
             for url in link:
-                link[url].download()
+                url_fname = local_storage + "articles/" +  Utils.genFnameFromURL(url)
+                urlmap[url] = url_fname
                 completed[index] += 1
-                if link[url].html == '':
-                    break   # A server error occured, don't parse, it won't work
-                link[url].parse()
-        results[index] = [{key: link[key].text} for link in links for key in link]
+                # Only download links we haven't downloaded already
+                if not os.path.isfile(url_fname):
+                    link[url].download()
+                    if not os.path.isdir(local_storage + "articles/"):
+                        os.mkdir(local_storage + "articles/")
+                    with open(url_fname, 'w') as articleFile:
+                        if link[url].html == '':
+                            break   # A server error occurred, don't parse, it won't work
+                        link[url].parse()
+                        articleFile.write(link[url].text)
+        results[index] = urlmap
 
-    # Only process unique links
     unique_links = { d['SOURCEURL'] for d in GDeltData }
-    links = [{link: Article(link)} for link in unique_links]
-    linklists = chunkify(links, threadCount)
+    links = [{link: Article(link, config=linkDownloadConfig)} for link in unique_links]
+    linklists = Utils.chunkify(links, threadCount)
 
     print("Loading {0} links".format(len(links)))
     bar = Bar("Processing:", max=len(links))
@@ -144,7 +155,68 @@ def loadLinks(GDeltData, threadCount=8):
     while sum(completed) < len(links):
         sleep(0.1)
         tmp_completed = sum(completed)
-        bar.next(sum(completed) - current_total)
+        bar.next(sum(completed)- current_total)
+        if sum(completed) >= len(links):
+            break
+        current_total = tmp_completed
+    bar.finish()
+    for thread in threads:
+        thread.join()
+    return {link:linkset[link] for linkset in results for link in linkset}
+
+
+
+def loadLinks(GDeltData, threadCount=8):
+    """Downloads the links and provides the downloaded content for each URL
+
+    This will crush your computer if there are many links
+
+    Use downloadLinks instead
+    It will save the file and return the url-filename mapping
+
+    :GDeltData: The dataset for gdelt, obtained from loadGDeltFile
+    :threadCount: Number of threads to download and parse links over
+    :returns: url-content mapping
+
+    """
+
+
+    def handleLinks(links, results, index):
+        """
+        downloads, parses, and inserts links into the results
+        """
+        for linkid, link in enumerate(links):
+            for url in link:
+                link[url].download()
+                completed[index] += 1
+                if link[url].html == '':
+                    break   # A server error occured, don't parse, it won't work
+                link[url].parse()
+        results[index] = [{key: link[key].text} for link in links for key in link]
+
+    # Only process unique links
+    unique_links = { d['SOURCEURL'] for d in GDeltData }
+    links = [{link: Article(link)} for link in unique_links]
+    linklists = Utils.chunkify(links, threadCount)
+
+    print("Loading {0} links".format(len(links)))
+    bar = Bar("Processing:", max=len(links))
+
+    threadCount = threadCount if len(linklists) > threadCount else len(linklists)
+
+    results = [None] * threadCount
+    threads = [None] * threadCount
+    completed =  [0] * threadCount
+
+    for i in range(threadCount):
+        threads[i] = threading.Thread(target=handleLinks, args=(linklists[i], results, i))
+        threads[i].start()
+
+    current_total = sum(completed)
+    while sum(completed) < len(links):
+        sleep(0.1)
+        tmp_completed = sum(completed)
+        bar.next(tmp_completed - current_total)
         if sum(completed) >= len(links):
             break
         current_total = tmp_completed
