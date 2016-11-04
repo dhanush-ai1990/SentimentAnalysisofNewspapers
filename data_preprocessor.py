@@ -28,6 +28,7 @@ from scipy.sparse import coo_matrix
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 from nltk.tokenize import TreebankWordTokenizer
+from sklearn.model_selection import cross_val_score
 
 
 domain_total_count = {}
@@ -147,8 +148,8 @@ print 'Total Article count across all classes: ' + str(total_article_count)
 
 
 # collecting domain names accross all classes
-#for i in range(1,21,1):
-for i in range(8,10,1):
+for i in range(1,21,1):
+#for i in range(8,10,1):
     if len(code_dict[i]._domain_count) == 0:
         continue
     domain_total_count =add_dict(domain_total_count,code_dict[i]._domain_count)
@@ -169,11 +170,11 @@ print ""
 
 # To FetchData from text file, create feature and label list, Do domain selection and write the Domain selcted Data
 
-#for i in range(1,21,1):
-for i in range(8,10,1):
+char_count_min = 1000
+for i in range(1,21,1):
     if code_dict[i]._article_count < 1:
         continue
-    code_dict[i].FetchData(1,0,2500)
+    code_dict[i].FetchData(1,0,char_count_min)
     total_feature_location += code_dict[i]._article_to_list
     total_label   += code_dict[i]._label 
 
@@ -184,16 +185,11 @@ stop_words = {'english',}
 cv = CountVectorizer(input ='total_feature_location',stop_words = {'english'},lowercase=True,analyzer ='word',binary =False)#,max_features =75000)
 X = cv.fit_transform(total_feature_location).toarray()
 vocab = np.array(cv.get_feature_names())
-print vocab[1000:1500]
+#print vocab[1000:1500]
 feature_names = cv.get_feature_names()
 y = np.array(total_label)
-"""
-X_sparse = coo_matrix(X)
-X, X_sparse, y = shuffle(X, X_sparse, y, random_state=0)
-X = X_sparse.toarray()
-"""
-X_train, X_test, y_train, y_test = train_test_split(X,y ,test_size=0.2, random_state=5677)
 
+X_train, X_test, y_train, y_test = train_test_split(X,y ,test_size=0.2, random_state=5677)
 
 print "Training"
 print "Size of Train dataset is :" + str(len(y_train)) + "  " + str(len(X_train))
@@ -202,12 +198,24 @@ print "Size of Test dataset is :" + str(len(y_test)) + "  " + str(len(X_test))
 alpha = 0.00001
 #clf = BernoulliNB(alpha = alpha)
 clf = MultinomialNB(alpha = alpha)
-clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-print " "
-print "train accuracy:" +str(clf.score(X_train,y_train))
-print "test accuracy:" +str(clf.score(X_test,y_test))
 
+# Monte Carlo cross-validation
+cv_score = []
+train_score = []
+for i in range(5):
+    X_train, X_CV, y_train, y_CV = train_test_split(X_train,y_train ,test_size=0.15, random_state=5677)
+    clf.fit(X_train, y_train)
+    #y_pred = clf.predict(X_CV)
+    train_score.append(clf.score(X_train,y_train))
+    cv_score.append((clf.score(X_CV,y_CV)))
+
+# 5 fold cross validation
+#for i in range(5):
+
+
+print " Train Accuracy: %0.2f " % (sum(train_score)/len(train_score))
+print " CV Accuracy: %0.2f " % (sum(cv_score)/len(cv_score))
+print " Test Accuracy" + str(clf.score(X_test,y_test))
 #print "*"
 #print y_pred[1:100]
 #print y_test[1:100]
@@ -217,7 +225,10 @@ print "test accuracy:" +str(clf.score(X_test,y_test))
 print ""
 
 
+"""
 
-
-
-
+train_accuracy = []
+cv_accuracy = []
+document_count = []
+character_limit = []
+"""
