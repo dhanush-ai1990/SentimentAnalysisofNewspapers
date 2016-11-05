@@ -31,7 +31,7 @@ class BuildData(object):
         
         for i in range(1,21,1):  
             code = i
-            self.code_dict[i] = DataPreprocessor(file_loc,code)
+            self.code_dict[i] = DataPreprocessor(self._file_loc,code)
             self.code_dict[i].count_domain_names()
             self.total_article_count += self.code_dict[i]._article_count
         print 'Total Article count across all classes: ' + str(self.total_article_count)
@@ -72,7 +72,7 @@ class DataPreprocessor(object):
     
     def __init__(self,file_loc,code):
         self._file_loc = file_loc+str(code)
-        self._file_loc_out =file_loc_out +str(code)
+        self._file_loc_out = ''
         self._code = code
         self._domain_count = {}
         self._article_count = 0
