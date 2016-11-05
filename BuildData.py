@@ -7,7 +7,7 @@ from scipy.sparse import coo_matrix
 #file_loc_out ='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_Domain_selected/CODE_'
 
 
-class BuildData():
+class BuildData(object):
     
     def __init__(self,file_loc):
         self._file_loc = file_loc

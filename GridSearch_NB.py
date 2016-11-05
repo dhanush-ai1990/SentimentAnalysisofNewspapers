@@ -20,6 +20,7 @@ import os
 import tldextract
 import numpy as np
 import re
+from BuildData import BuildData
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.naive_bayes import BernoulliNB
