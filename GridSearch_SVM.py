@@ -80,20 +80,35 @@ def MyGaussianNB(X_train, y_train):
 	return classifier.cv_results_
 
 
+def Mylinear_svm(X_train, y_train):
+	linear_svc = svm.SVC(kernel='linear')#,decision_function_shape ='ovo'/'ovr'
+	#param_grid = {'C': np.logspace(-3, 2, 6)}
+	param_grid = {'C': [ 0.01, 0.1, 1.0 ,10.0, 100.0]}
+	classifier= GridSearchCV(estimator=linear_svc, cv=10 ,param_grid=param_grid)
+	y_train= np.array(y_train)
+	print y_train
+	classifier.fit(X_train, y_train)
+	return classifier.cv_results_
+
+def rbf_svm(X_train, y_train):
+	rbf_svc = svm.SVC(kernel='rbf')#,max_iter = 10000,cache_size =1024,decision_function_shape ='ovo'/'ovo'
+	param_grid = {'C': np.logspace(-3, 2, 6), 'gamma': np.logspace(-3, 2, 6)}
+	classifier= GridSearchCV(estimator=rbf_svc, cv=10 ,param_grid=param_grid)
+	y_train= np.array(y_train)
+	classifier.fit(X_train, y_train)
+	return classifier.cv_results_
+
 # main Function
 gc.enable()
 #Varying Character limit and Document count and study Variance and Biasis
-Domain_select = 0
+Domain_select = 1
 write_output = 0
 characters_limit = 0
 Document_count = []
 character_count =[]
-results_CV_MNB = []
-results_train_MNB = []
-results_CV_GNB = []
-results_train_GNB = []
-results_CV_BNB = []
-results_train_BNB = []
+results_LSVM = []
+results_train_LSVM =[]
+results_CV_LSVM = []
 feature_count = []
 features = 5000
 data=data_extract_using_parms(Domain_select,write_output,characters_limit,file_loc_out,features)
@@ -102,74 +117,52 @@ total_label = data[1]
 train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
 max_features =train_test_data[4]
 print max_features
-for i in range(1,21,1):
+for i in range(1,3,1):
 	if features > max_features:
 		continue
 	print "Training loop: " + str(i)
+	feature_count.append(features)
 	train_test_data=Vectorize_split(total_feature_list,total_label,features,True)
-	results_BNB = MyBernoulliNB(train_test_data[0],train_test_data[2])
-	results_train_BNB.append(1 - np.mean(results_BNB['mean_train_score']))
-	results_CV_BNB.append(1-np.mean(results_BNB['mean_test_score']))
-	
-	train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
-	results_MNB = MyMultiNomialNB(train_test_data[0],train_test_data[2])
-	results_train_MNB.append(1 - np.mean(results_MNB['mean_train_score']))
-	results_CV_MNB.append(1-np.mean(results_MNB['mean_test_score']))
-	
-	"""
-	results_GNB = MyGaussianNB(train_test_data[0].toarray(),train_test_data[2])
-	results_train_GNB.append(1 - np.mean(results_GNB['mean_train_score']))
-	results_CV_GNB.append(1-np.mean(results_GNB['mean_test_score']))
-	"""
-	Document_count.append((train_test_data[0]).shape[0])
-	character_count.append(characters_limit) 
-	feature_count.append(train_test_data[4])
-	features +=10000
+	print "Features: " + str(train_test_data[4])
+	print "Total Docs: " + str((train_test_data[0]).shape[0])
+	results_LSVM = Mylinear_svm(train_test_data[0],train_test_data[2])
+	results_train_LSVM.append(1 - np.mean(results_LSVM['mean_train_score']))
+	results_CV_LSVM.append(1-np.mean(results_LSVM['mean_test_score']))
+	features +=5000
 
-	
-
-with PdfPages('MultinomialNB_Feature_size_vs_Error_study.pdf') as pdf:
-    pl.plot(feature_count,results_train_MNB,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot(feature_count,results_CV_MNB,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+with PdfPages('SVM_Linear_kernal_Feature_size.pdf') as pdf:
+    pl.plot(feature_count,results_train_LSVM,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot(feature_count,results_CV_LSVM,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
     pl.ylabel('Classification Error',color='r')
-    pl.xlabel('Number Of features for Training',color='r')
-    pl.title('Multinomial NB - Error Vs # of features for train using CountVectorizer',color = 'r')
+    pl.xlabel('Number of features',color='r')
+    pl.title('SVM_linear_kernal - Error Vs # of features for training',color = 'r')
     pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
     pdf.savefig()
     pl.close()
-
-with PdfPages('BernoulliNB_Feature_size_vs_Error_study.pdf') as pdf:
-    pl.plot(feature_count,results_train_BNB,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot(feature_count,results_CV_BNB,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
-    pl.ylabel('Classification Error',color='r')
-    pl.xlabel('Number Of features for Training',color='r')
-    pl.title('Bernoulli NB - Error Vs # of features for train using CountVectorizer',color = 'r')
-    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
-    pdf.savefig()
-    pl.close()
-
-
-print "------- Multinomial Naive Bayes-------------------------------------"
-index_max_accuracy = results_CV_MNB.index(min(results_CV_MNB))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_MNB))
-print "Maximum Train accuracy: " + str(1-min(results_train_MNB))
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
-
-print "------- BernoulliNB Naive Bayes-------------------------------------"
-index_max_accuracy = results_CV_BNB.index(min(results_CV_BNB))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_BNB))
-print "Maximum Train accuracy: " + str(1-min(results_train_BNB))
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
-
 """
-print "------- GaussianNB Naive Bayes-------------------------------------"
-index_max_accuracy = results_CV_GNB.index(min(results_CV_GNB))
-print "Maximum Train accuracy: " + str(1-min(results_train_GNB))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_GNB))
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
+with PdfPages('MultinomialNB_Character-LIMIT_study.pdf') as pdf:
+    pl.plot(character_count,results_train,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot(character_count,results_CV,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+    pl.ylabel('Classification Error',color='r')
+    pl.xlabel('Number Of minimum characters per document',color='r')
+    pl.title('Multinomial NB - Error Vs # of Character per doc for train with domain sel',color = 'r')
+    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
+    pdf.savefig()
+    pl.close()
+"""
+
+
+
+print "------- Linear SVM-------------------------------------"
+#index_max_accuracy = results_CV_LSVM.index(min(results_CV_LSVM))	
+print "Maximum CV accuracy : " + str(1- min(results_CV_LSVM))
+print ""
+print "Train scores: " + (results_LSVM['mean_train_score'])
+print "CV scores: " + (results_LSVM['mean_test_score'])
+#print "character_count for max CV accuracy : " + str(character_count[index_max_accuracy])
+#print "Document_count for max CV accuracy : " + str (Document_count[index_max_accuracy])
+#print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
 print "--------------------------------------------------------------------"
-"""
-
 
 
 

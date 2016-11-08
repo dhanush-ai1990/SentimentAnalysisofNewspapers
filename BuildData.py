@@ -34,7 +34,7 @@ class BuildData(object):
             self.code_dict[i] = DataPreprocessor(self._file_loc,code)
             self.code_dict[i].count_domain_names()
             self.total_article_count += self.code_dict[i]._article_count
-        print 'Total Article count across all classes: ' + str(self.total_article_count)
+        #print 'Total Article count across all classes: ' + str(self.total_article_count)
 
         # collecting domain names accross all classes
         for i in range(1,21,1):
@@ -43,7 +43,7 @@ class BuildData(object):
                 continue
             self.domain_total_count =self.add_dict(self.domain_total_count,self.code_dict[i]._domain_count)
 
-        print 'Total Unique Domains: ' + str(len(self.domain_total_count))
+        #print 'Total Unique Domains: ' + str(len(self.domain_total_count))
 
         #print domain_top_list  
         count = 0
@@ -53,7 +53,7 @@ class BuildData(object):
             if count < 101 :
                 #print  w + " " + str(domain_total_count[w])
                 self.domain_top_list.append(w)
-        print ""
+        #print ""
     
     def fetch_train_test_data(self,domain_select,write_output,char_limit,output_loc): 
         data = []
@@ -65,7 +65,7 @@ class BuildData(object):
             self.total_label   += self.code_dict[i]._label 
         data.append(self.total_feature_location)
         data.append(self.total_label)
-        print "size of training documents: " + str(len(self.total_label))
+        #print "size of training documents: " + str(len(self.total_label))
         return   data  
         
 class DataPreprocessor(object):
@@ -119,7 +119,8 @@ class DataPreprocessor(object):
                             f1 = open(file_to_read,'r')
                             f1.readline()
                             f1.readline()
-                            f1.readline()
+                            label=f1.readline()
+                            self._label.append(int(label))
                             data = f1.read()
                             letters_only = re.sub("[^a-zA-Z]", " ", data) 
                             self._domain_selected_article_count +=1
@@ -128,7 +129,8 @@ class DataPreprocessor(object):
                         f1 = open(file_to_read,'r')
                         f1.readline()
                         f1.readline()
-                        f1.readline()
+                        label = f1.readline()
+                        self._label.append(int(label))
                         data = f1.read()
                         #letters_only = re.sub("[^a-zA-Z]", " ", data) 
                         self._article_to_list.append(data)
@@ -136,7 +138,7 @@ class DataPreprocessor(object):
             print 'unable to perform Fetch Operation_Codeis: %s' %(self._code)
             print format(err)
             return
-        self._label = [self._code for i in range(len(self._article_to_list))]
+        #self._label = [self._code for i in range(len(self._article_to_list))]
 
 
     def count_domain_names(self):
