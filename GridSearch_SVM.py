@@ -101,9 +101,9 @@ def rbf_svm(X_train, y_train):
 # main Function
 gc.enable()
 #Varying Character limit and Document count and study Variance and Biasis
-Domain_select = 1
+Domain_select = 0
 write_output = 0
-characters_limit = 0
+characters_limit = 10
 Document_count = []
 character_count =[]
 results_LSVM = []
@@ -157,8 +157,8 @@ print "------- Linear SVM-------------------------------------"
 #index_max_accuracy = results_CV_LSVM.index(min(results_CV_LSVM))	
 print "Maximum CV accuracy : " + str(1- min(results_CV_LSVM))
 print ""
-print "Train scores: " + (results_LSVM['mean_train_score'])
-print "CV scores: " + (results_LSVM['mean_test_score'])
+print "Train scores: " + str(results_LSVM['mean_train_score'])
+print "CV scores: " + str(results_LSVM['mean_test_score'])
 #print "character_count for max CV accuracy : " + str(character_count[index_max_accuracy])
 #print "Document_count for max CV accuracy : " + str (Document_count[index_max_accuracy])
 #print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])

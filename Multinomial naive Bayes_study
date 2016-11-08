@@ -1,0 +1,59 @@
+Multinomial naive Bayes
+-----------------------
+
+	Domain Selection - Done
+	Variation of Size of Document and no of characters per document
+	Results
+	-------
+	Maximum CV accuracy : 0.630786086004
+	character_count for max CV accuracy: 4000
+	Document_count for max CV accuracy: 7302
+
+	Domain Selction _ Not Done
+
+
+	Domain_selection _ not Done
+	Results:
+	--------
+	Maximum CV accuracy : 0.620746460746
+	character_count for max CV accuracy: 5000
+	Document_count for max CV accuracy: 19425
+
+	Conclusion, we are not getting a significant increase in performance and also we want our model to generalise on any domain articles and any size of characters. Therefore these experiments are discarded.
+------------------------------------------------------------------------------------
+Bernoulli NB
+
+	Domain Selection Done:
+	Results:
+	--------
+	Maximum CV accuracy : 0.560188989318
+	character_count for max CV accuracy: 4000
+	Document_count for max CV accuracy: 7302
+
+	Domain Selection - Not Done
+	Results:
+	-------
+	Maximum CV accuracy : 0.632771662259
+	character_count for max CV accuracy: 5500
+	Document_count for max CV accuracy: 16261
+
+
+feature study
+
+	Training loop: 1
+------- Multinomial Naive Bayes-------------------------------------
+Maximum CV accuracy : 0.528896192824
+character_count for max CV accuracy : 4000
+Document_count for max CV accuracy : 7302
+Feature count for max CV accuracy 10000
+------- BernoulliNB Naive Bayes-------------------------------------
+Maximum CV accuracy : 0.578677074774
+character_count for max CV accuracy : 4000
+Document_count for max CV accuracy : 7302
+Feature count for max CV accuracy 10000
+------- GaussianNB Naive Bayes-------------------------------------
+Maximum CV accuracy : 0.604354971241
+character_count for max CV accuracy : 4000
+Document_count for max CV accuracy : 7302
+Feature count for max CV accuracy 10000
+--------------------------------------------------------------------
