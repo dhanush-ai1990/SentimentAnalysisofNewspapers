@@ -139,10 +139,12 @@ features = 'max'
 data=data_extract_using_parms(Domain_select,write_output,characters_limit,file_loc_out,features)
 total_feature_list = data[0]
 total_label = data[1]
-features = 10
+features = 100
 
 for i in range(1,21,1):
-	train_test_data=Vectorize_split(total_feature_list,total_label,features,True)
+	print i
+	train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
+	"""
 	results_DTC = MyDecisionTree(train_test_data[0],train_test_data[2])
 	results_train_DTC.append(1 - np.mean(results_DTC['mean_train_score']))
 	results_CV_DTC.append(1-np.mean(results_DTC['mean_test_score']))
@@ -152,13 +154,14 @@ for i in range(1,21,1):
 	results_RFC = MyRandomForest(train_test_data[0],train_test_data[2])
 	results_train_RFC.append(1 - np.mean(results_RFC['mean_train_score']))
 	results_CV_RFC.append(1-np.mean(results_RFC['mean_test_score']))
+	"""
 	results_ABC = MyAdaBoostClassifier(train_test_data[0],train_test_data[2])
 	results_train_ABC.append(1 - np.mean(results_ABC['mean_train_score']))
 	results_CV_ABC.append(1-np.mean(results_ABC['mean_test_score']))
 	feature_count.append(train_test_data[4])
 	Document_count.append((train_test_data[0]).shape[0])
 	features +=10
-
+"""
 with PdfPages('Decision_Tree_Feature_size_vs_Error_study.pdf') as pdf:
     pl.plot(feature_count,results_train_DTC,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
     pl.plot(feature_count,results_CV_DTC,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
@@ -188,7 +191,7 @@ with PdfPages('extremely Random Tree_Feature_size_vs_Error_study.pdf') as pdf:
     pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
     pdf.savefig()
     pl.close()
-
+"""
 with PdfPages('AdaBoost_Feature_size_vs_Error_study.pdf') as pdf:
     pl.plot(feature_count,results_train_ABC,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
     pl.plot(feature_count,results_CV_ABC,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
@@ -199,7 +202,7 @@ with PdfPages('AdaBoost_Feature_size_vs_Error_study.pdf') as pdf:
     pdf.savefig()
     pl.close()
 
-
+"""
 print "------- Decision Tree Classifier-------------------------------------"
 index_max_accuracy = results_CV_DTC.index(min(results_CV_DTC))	
 print "Maximum CV accuracy : " + str(1- min(results_CV_DTC))
@@ -215,6 +218,7 @@ index_max_accuracy = results_CV_ETC.index(min(results_CV_ETC))
 print "Maximum CV accuracy : " + str(1- min(results_CV_ETC))
 print "Maximum Train accuracy: " + str(1-min(results_train_ETC))
 print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
+"""
 print "------- AdaBoostClassifier-------------------------------------"
 index_max_accuracy = results_CV_ABC.index(min(results_CV_ABC))	
 print "Maximum CV accuracy : " + str(1- min(results_CV_ABC))
