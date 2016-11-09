@@ -84,29 +84,29 @@ def MyGaussianNB(X_train, y_train):
 
 def MyRandomForest(X_train, y_train):
 	clf = RandomForestClassifier()
-	param_grid = {'n_estimators': [10,20,30,50,70,100]}
+	param_grid = {'n_estimators': [10,20,30,50,70,100,200,500,1000,2000,2500]}
 	classifier= GridSearchCV(estimator=clf, cv=3 ,param_grid=param_grid)
 	classifier.fit(X_train, y_train)
 	return classifier.cv_results_
 
 def MyDecisionTree(X_train, y_train):
 	clf = DecisionTreeClassifier(min_samples_split=2,random_state=0)
-	param_grid = {'max_depth': [10,25,50,75,100]}
+	param_grid = {'max_depth': [1,5,10,25,50,75,100,500,1000,2000]}
 	classifier= GridSearchCV(estimator=clf, cv=3 ,param_grid=param_grid)
 	classifier.fit(X_train, y_train)
 	return classifier.cv_results_
 
 def MyExtraTreeClassifier(X_train, y_train):
-	clf = ExtraTreesClassifier(min_samples_split=2, random_state=0)
-	param_grid ={'n_estimators': [10,20,30,40,50,75,100]}
-	#param_grid = {'max_depth': [10,25,50,75,100]}
+	clf = ExtraTreesClassifier(min_samples_split=2, random_state=0,max_depth = 10)
+	param_grid = {'n_estimators': [10,20,30,50]}
+	#param_grid = {'max_depth': [1,5,10,25,50,75,100,500,1000,2000]}
 	classifier= GridSearchCV(estimator=clf, cv=3 ,param_grid=param_grid)
 	classifier.fit(X_train, y_train)
 	return classifier.cv_results_
 
 def MyAdaBoostClassifier(X_train, y_train):
-	clf = AdaBoostClassifier()
-	param_grid = {'n_estimators': [10,20,30,50,70,100]}
+	clf = AdaBoostClassifier(DecisionTreeClassifier(max_depth=10),learning_rate=0.5)
+	param_grid = {'n_estimators': [1000,2000,2500]}
 	classifier= GridSearchCV(estimator=clf, cv=3 ,param_grid=param_grid)
 	classifier.fit(X_train, y_train)
 	return classifier.cv_results_
@@ -124,7 +124,7 @@ gc.enable()
 #5) Do not give too many inputs or features since these will overfit easily.
 Domain_select = 1
 write_output = 0
-characters_limit = 10
+characters_limit = 2500
 Document_count = []
 results_CV_DTC = []
 results_train_DTC = []
@@ -139,88 +139,111 @@ features = 'max'
 data=data_extract_using_parms(Domain_select,write_output,characters_limit,file_loc_out,features)
 total_feature_list = data[0]
 total_label = data[1]
-features = 10
+features = 170
 
-for i in range(1,21,1):
+for i in range(1,2,1):
+	print i
 	train_test_data=Vectorize_split(total_feature_list,total_label,features,True)
+	"""
 	results_DTC = MyDecisionTree(train_test_data[0],train_test_data[2])
 	results_train_DTC.append(1 - np.mean(results_DTC['mean_train_score']))
 	results_CV_DTC.append(1-np.mean(results_DTC['mean_test_score']))
-	results_ETC = MyExtraTreeClassifier(train_test_data[0],train_test_data[2])
-	results_train_ETC.append(1 - np.mean(results_ETC['mean_train_score']))
-	results_CV_ETC.append(1-np.mean(results_ETC['mean_test_score']))
-	results_RFC = MyRandomForest(train_test_data[0],train_test_data[2])
-	results_train_RFC.append(1 - np.mean(results_RFC['mean_train_score']))
-	results_CV_RFC.append(1-np.mean(results_RFC['mean_test_score']))
+	"""
+	#results_ETC = MyExtraTreeClassifier(train_test_data[0],train_test_data[2])
+	#results_train_ETC.append(1 - np.mean(results_ETC['mean_train_score']))
+	#results_CV_ETC.append(1-np.mean(results_ETC['mean_test_score']))
+	#print "Training Random Forest"
+	#results_RFC = MyRandomForest(train_test_data[0],train_test_data[2])
+	#results_train_RFC.append(1 - np.mean(results_RFC['mean_train_score']))
+	#results_CV_RFC.append(1-np.mean(results_RFC['mean_test_score']))
+	print "Training Adaboost"
 	results_ABC = MyAdaBoostClassifier(train_test_data[0],train_test_data[2])
-	results_train_ABC.append(1 - np.mean(results_ABC['mean_train_score']))
-	results_CV_ABC.append(1-np.mean(results_ABC['mean_test_score']))
+	#results_train_ABC.append(1 - np.mean(results_ABC['mean_train_score']))
+	#results_CV_ABC.append(1-np.mean(results_ABC['mean_test_score']))
 	feature_count.append(train_test_data[4])
 	Document_count.append((train_test_data[0]).shape[0])
-	features +=10
-
-with PdfPages('Decision_Tree_Feature_size_vs_Error_study.pdf') as pdf:
-    pl.plot(feature_count,results_train_DTC,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot(feature_count,results_CV_DTC,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
-    pl.ylabel('Classification Error',color='r')
-    pl.xlabel('Number Of features for Training',color='r')
-    pl.title('Decision Tree - Error Vs # of features for train using CountVectorizer',color = 'r')
-    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
-    pdf.savefig()
-    pl.close()
-
-with PdfPages('Random_forests_Feature_size_vs_Error_study.pdf') as pdf:
-    pl.plot(feature_count,results_train_RFC,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot(feature_count,results_CV_RFC,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
-    pl.ylabel('Classification Error',color='r')
-    pl.xlabel('Number Of features for Training',color='r')
-    pl.title('Random_forests - Error Vs # of features for train',color = 'r')
-    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
-    pdf.savefig()
-    pl.close()
-
-with PdfPages('extremely Random Tree_Feature_size_vs_Error_study.pdf') as pdf:
-    pl.plot(feature_count,results_train_ETC,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot(feature_count,results_CV_ETC,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
-    pl.ylabel('Classification Error',color='r')
-    pl.xlabel('Number Of features for Training',color='r')
-    pl.title('Extree Random_Tree - Error Vs # of features for train',color = 'r')
-    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
-    pdf.savefig()
-    pl.close()
-
-with PdfPages('AdaBoost_Feature_size_vs_Error_study.pdf') as pdf:
-    pl.plot(feature_count,results_train_ABC,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot(feature_count,results_CV_ABC,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
-    pl.ylabel('Classification Error',color='r')
-    pl.xlabel('Number Of features for Training',color='r')
-    pl.title('Adaboost - Error Vs # of features for train using CountVectorizer',color = 'r')
-    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
-    pdf.savefig()
-    pl.close()
-
-
+	#features +=10
+"""
 print "------- Decision Tree Classifier-------------------------------------"
-index_max_accuracy = results_CV_DTC.index(min(results_CV_DTC))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_DTC))
-print "Maximum Train accuracy: " + str(1-min(results_train_DTC))
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
-print "------- RandomForestClassifier-------------------------------------"
-index_max_accuracy = results_CV_RFC.index(min(results_CV_RFC))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_RFC))
-print "Maximum Train accuracy: " + str(1-min(results_train_RFC))
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
-print "------- Extemely Random Tree Classifier-------------------------------------"
-index_max_accuracy = results_CV_ETC.index(min(results_CV_ETC))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_ETC))
-print "Maximum Train accuracy: " + str(1-min(results_train_ETC))
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
-print "------- AdaBoostClassifier-------------------------------------"
-index_max_accuracy = results_CV_ABC.index(min(results_CV_ABC))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_ABC))
-print "Maximum Train accuracy: " + str(1-min(results_train_ABC))
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
+index_max_accuracy = np.argmax(results_DTC['mean_test_score'])
+print index_max_accuracy
+print "Maximum CV accuracy : "
+print results_DTC['mean_test_score']
+print "Maximum Train accuracy: " 
+print results_DTC['mean_train_score']
+depth = [1,5,10,25,50,75,100,500,1000,2000]
+print "max_depth" +str(depth[index_max_accuracy])
 
-print str(max(Document_count))
+print "------- Extemely Random Tree Classifier-------------------------------------"
+index_max_accuracy = np.argmax(results_ETC['mean_test_score'])	
+print "Maximum CV accuracy : "
+print results_ETC['mean_test_score']
+print "Maximum Train accuracy: " 
+print results_ETC['mean_train_score']
+estimators = [10,20,30,50]
+print "max_estimator" +str(estimators[index_max_accuracy])
+
+print "------- RandomForestClassifier-------------------------------------"
+index_max_accuracy = np.argmax(results_RFC['mean_test_score'])
+print "Maximum CV accuracy : "
+print results_RFC['mean_test_score']
+print "Maximum Train accuracy: " 
+print results_RFC['mean_train_score']
+estimators = [10,20,30,50,70,100,200,500,1000,2000,2500]
+print "max_estimator" +str(estimators[index_max_accuracy])
+
+"""
+print "------- AdaBoostClassifier-------------------------------------"
+index_max_accuracy = np.argmax(results_ABC['mean_test_score'])	
+print "Maximum CV accuracy : "
+print results_ABC['mean_test_score']
+print "Maximum Train accuracy: " 
+print results_ABC['mean_train_score']
+estimators = [10,20,30,50,70,100,200,500,1000,2000,2500]
+print "max_estimator" +str(estimators[index_max_accuracy])
+
+"""
+with PdfPages('Decision_Tree_Depth_vs_Accuracy_study.pdf') as pdf:
+    pl.plot([1,5,10,25,50,75,100,500,1000,2000],results_DTC['mean_train_score'],marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot([1,5,10,25,50,75,100,500,1000,2000],results_DTC['mean_test_score'],marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+    pl.ylabel('Classification Accuracy',color='r')
+    pl.xlabel('Depth of Tree',color='r')
+    pl.title('Decision Tree - Accuracy Vs Depth of tree using CountVectorizer',color = 'r')
+    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
+    pdf.savefig()
+    pl.close()
+
+with PdfPages('Random_forests_No_of_estimators_vs_Accuracy_study.pdf') as pdf:
+    pl.plot([10,20,30,50,70,100,200,500,1000,2000,2500],results_RFC['mean_train_score'],marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot([10,20,30,50,70,100,200,500,1000,2000,2500],results_RFC['mean_test_score'],marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+    pl.ylabel('Classification Accuracy',color='r')
+    pl.xlabel('Number Of Estimators',color='r')
+    pl.title('Random_forests - Accuracy Vs # of estimator for train using CountVectorizer',color = 'r')
+    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
+    pdf.savefig()
+    pl.close()
+
+with PdfPages('extremely Random Tree__estimators_vs_Accuracy_study.pdf') as pdf:
+    pl.plot([1,5,10,25,50],results_ETC['mean_train_score'],marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot([1,5,10,25,50],results_ETC['mean_test_score'],marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+    pl.ylabel('Classification Accuracy',color='r')
+    pl.xlabel('Number Of estimators for Training',color='r')
+    pl.title('Extree Random_Tree - Accuracy Vs # estimators for train using CountVectorizer',color = 'r')
+    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
+    pdf.savefig()
+    pl.close()
+
+with PdfPages('AdaBoost_No_of_estimators_vs_Accuracy_study.pdf') as pdf:
+    pl.plot([10,20,30,50,70,100,200,500,1000,2000,2500],results_ABC['mean_train_score'],marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot([10,20,30,50,70,100,200,500,1000,2000,2500],results_ABC['mean_test_score'],marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+    pl.ylabel('Classification Accuracy',color='r')
+    pl.xlabel('Number Of estimators for Training',color='r')
+    pl.title('Adaboost - Accuracy Vs # of estimators for train using CountVectorizer',color = 'r')
+    pl.legend(bbox_to_anchor=(0.69, 0.27), loc=2, borderaxespad=0.)
+    pdf.savefig()
+    pl.close()
+
+"""
+
 
 
