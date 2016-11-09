@@ -62,7 +62,8 @@ def Vectorize_split(total_feature_list,total_label,features,binary):
 
 def MyMultiNomialNB(X_train, y_train):
 	clf = MultinomialNB()
-	param_grid = {'alpha': [0.0000001,0.00001,0.001,0.01,0.1,0.05,0.5,1.0,10] }
+	#param_grid = {'alpha': [0.000000001,0.00000001,0.0000001,0.0000001] }
+	param_grid = {'alpha': [0.000000001] }
 	# Ten fold Cross Validation
 	classifier= GridSearchCV(estimator=clf, cv=10 ,param_grid=param_grid)
 	classifier.fit(X_train, y_train)
@@ -70,7 +71,8 @@ def MyMultiNomialNB(X_train, y_train):
 
 def MyBernoulliNB(X_train, y_train):
 	clf = BernoulliNB()
-	param_grid = {'alpha': [0.0000001,0.00001,0.001,0.01,0.1,0.05,0.5,1.0,10] }
+	#param_grid = {'alpha': [0.000000001,0.00000001,0.0000001,0.0000001]}
+	param_grid = {'alpha': [0.000000001] }
 	# Ten fold Cross Validation
 	classifier= GridSearchCV(estimator=clf, cv=10 ,param_grid=param_grid)
 	classifier.fit(X_train, y_train)
@@ -91,7 +93,7 @@ gc.enable()
 #Varying Character limit and Document count and study Variance and Biasis
 Domain_select = 0
 write_output = 0
-characters_limit = 10
+characters_limit = 5000
 Document_count = []
 character_count =[]
 results_CV_MNB = []
@@ -108,10 +110,11 @@ total_label = data[1]
 train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
 max_features =train_test_data[4]
 print max_features
-features = 150000
+features = 7500
 for i in range(1,2,1):
-	if features > max_features:
-		continue
+	#if features > max_features:
+	#	continue
+	"""
 	print "Training loop: " + str(i)
 	train_test_data=Vectorize_split(total_feature_list,total_label,features,True)
 	results_BNB = MyBernoulliNB(train_test_data[0],train_test_data[2])
@@ -126,8 +129,8 @@ for i in range(1,2,1):
 	
 	"""
 	results_GNB = MyGaussianNB(train_test_data[0].toarray(),train_test_data[2])
-	results_train_GNB.append(1 - np.mean(results_GNB['mean_train_score']))
-	results_CV_GNB.append(1-np.mean(results_GNB['mean_test_score']))
+	#results_train_GNB.append(1 - np.mean(results_GNB['mean_train_score']))
+	#results_CV_GNB.append(1-np.mean(results_GNB['mean_test_score']))
 	"""
 	Document_count.append((train_test_data[0]).shape[0])
 	character_count.append(characters_limit) 
@@ -136,8 +139,8 @@ for i in range(1,2,1):
 
 
 with PdfPages('MultinomialNB_Smooth_vs_Accuracy_study.pdf') as pdf:
-    pl.plot([0.0000001,0.00001,0.001,0.01,0.1,0.05,0.5,1.0,10],results_MNB['mean_train_score'],marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot([0.0000001,0.00001,0.001,0.01,0.1,0.05,0.5,1.0,10],results_MNB['mean_test_score'],marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+    pl.plot([0.000000001,0.00000001,0.0000001,0.0000001],results_MNB['mean_train_score'],marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot([0.000000001,0.00000001,0.0000001,0.0000001],results_MNB['mean_test_score'],marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
     pl.ylabel('Classification accuracy',color='r')
     pl.xlabel('Alpha',color='r')
     pl.title('Multinomial NB - Smooth Vs alpha for train using TfidfVectorizer',color = 'r')
@@ -146,8 +149,8 @@ with PdfPages('MultinomialNB_Smooth_vs_Accuracy_study.pdf') as pdf:
     pl.close()
 
 with PdfPages('BernoulliNB_Smooth_vs_Accuracy_study.pdf') as pdf:
-    pl.plot([0.0000001,0.00001,0.001,0.01,0.1,0.05,0.5,1.0,10],results_BNB['mean_train_score'],marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot([0.0000001,0.00001,0.001,0.01,0.1,0.05,0.5,1.0,10],results_BNB['mean_test_score'],marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+    pl.plot([0.000000001,0.00000001,0.0000001,0.0000001],results_BNB['mean_train_score'],marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot([0.000000001,0.00000001,0.0000001,0.0000001],results_BNB['mean_test_score'],marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
     pl.ylabel('Classification Accuracy',color='r')
     pl.xlabel('Alpha',color='r')
     pl.title('Bernoulli NB - Smooth Vs Alpha using TfidfVectorizer',color = 'r')
@@ -158,26 +161,23 @@ with PdfPages('BernoulliNB_Smooth_vs_Accuracy_study.pdf') as pdf:
 
 
 print "------- Multinomial Naive Bayes-------------------------------------"
-index_max_accuracy = results_CV_MNB.index(max(results_CV_MNB))	
-print "Maximum CV accuracy : " + str(max(results_CV_MNB))
+index_max_accuracy = results_CV_MNB.index(min(results_CV_MNB))	
 print (results_MNB['mean_test_score'])
-print "Maximum Train accuracy: " + str(max(results_train_MNB))
 print (results_MNB['mean_train_score'])
 print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
 print "------- BernoulliNB Naive Bayes-------------------------------------"
-index_max_accuracy = results_CV_BNB.index(max(results_CV_BNB))	
-print "Maximum CV accuracy : " + str(1- max(results_CV_BNB))
+index_max_accuracy = results_CV_BNB.index(min(results_CV_BNB))	
 print (results_BNB['mean_test_score'])
-print "Maximum Train accuracy: " + str(1-max(results_train_BNB))
 print (results_BNB['mean_train_score'])
 print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
 
 """
 print "------- GaussianNB Naive Bayes-------------------------------------"
-index_max_accuracy = results_CV_GNB.index(min(results_CV_GNB))
-print "Maximum Train accuracy: " + str(1-min(results_train_GNB))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_GNB))
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
+index_max_accuracy = np.argmax(results_GNB['mean_test_score'])
+print "CV SCORE"
+print (results_GNB['mean_test_score'])
+print ""
+print (results_GNB['mean_train_score'])
+#print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
 print "--------------------------------------------------------------------"
-"""
 

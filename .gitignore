@@ -56,3 +56,7 @@ ENV/
 .ropeproject
 
 *.ipynb
+
+*.pdf
+
+*.pdf
