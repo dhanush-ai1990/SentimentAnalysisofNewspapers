@@ -58,9 +58,10 @@ class BuildData(object):
     def fetch_train_test_data(self,domain_select,write_output,char_limit,output_loc): 
         data = []
         for i in range(1,21,1):
-            if self.code_dict[i]._article_count < 1:
-                continue
+            #if self.code_dict[i]._article_count < 1:
+            #    continue
             self.code_dict[i].FetchData(domain_select,write_output,char_limit,output_loc,self.domain_top_list)
+            print len(self.code_dict[i]._article_to_list)
             self.total_feature_location += self.code_dict[i]._article_to_list
             self.total_label   += self.code_dict[i]._label 
         data.append(self.total_feature_location)
@@ -94,7 +95,7 @@ class DataPreprocessor(object):
                 return
         try:
             for file in os.listdir(self._file_loc):
-                if file.endswith(".txt"):
+                if file.endswith(".csv")or file.endswith(".txt"):
                     file_to_read = self._file_loc + '/' + file 
                     f = open(file_to_read,'r')
                     num_chars = 0
@@ -108,17 +109,15 @@ class DataPreprocessor(object):
                             file_to_write = self._file_loc_out + '/_' + str(self._domain_selected_article_count)+ '.txt'
                             output = open(file_to_write, "w")
                             data = f1.read()
-                            letters_only = re.sub("[^a-zA-Z]", " ", data) 
-                            output.write(letters_only)
+                            #letters_only = re.sub("[^a-zA-Z]", " ", data) 
+                            output.write(data)
                             self._domain_selected_article_count +=1
-                            self._article_to_list.append(letters_only)
+                            self._article_to_list.append(data)
 
                     elif (flag == 1 and towrite == 0):
                         #print ext.domain
                         if ext.domain in domain_top_list:
                             f1 = open(file_to_read,'r')
-                            f1.readline()
-                            f1.readline()
                             label=f1.readline()
                             self._label.append(int(label))
                             data = f1.read()
@@ -127,13 +126,16 @@ class DataPreprocessor(object):
                             self._article_to_list.append(data)
                     else:
                         f1 = open(file_to_read,'r')
-                        f1.readline()
-                        f1.readline()
                         label = f1.readline()
-                        self._label.append(int(label))
+                        #self._label.append(int(label))
+                        temp = [20,18,13]
+                        if self._code in temp:
+                            self._label.append(0)
+                        else:
+                            self._label.append(1)
                         data = f1.read()
-                        #letters_only = re.sub("[^a-zA-Z]", " ", data) 
-                        self._article_to_list.append(data)
+                        letters_only = re.sub("[^a-zA-Z]", " ", data) 
+                        self._article_to_list.append(letters_only)
         except IOError as err:
             print 'unable to perform Fetch Operation_Codeis: %s' %(self._code)
             print format(err)
@@ -145,7 +147,7 @@ class DataPreprocessor(object):
         
         try:
             for file in os.listdir(self._file_loc):
-                if file.endswith(".txt"):
+                if file.endswith(".csv")or file.endswith(".txt"):
                     file_to_read = self._file_loc + '/' + file
                     f = open(file_to_read,'r') 
                     ext = tldextract.extract(f.readline())
