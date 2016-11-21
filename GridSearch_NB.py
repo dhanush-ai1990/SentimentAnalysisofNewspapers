@@ -29,7 +29,6 @@ from sklearn.datasets import make_blobs
 import gc
 from sklearn import svm
 
-
 file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_train/CODE_'
 file_loc_out ='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_domain_selected/CODE_'
 
@@ -42,15 +41,16 @@ def data_extract_using_parms(Domain_select,write_output,characters_limit,output_
 
 
 def Vectorize_split(total_feature_list,total_label,features,binary):
+
 	stop_words = {'english',}
 	if features == 'max':
 		cv = TfidfVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =binary)#,non_negative=True)#,max_features =75000)
 	else:
-		cv = TfidfVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =binary,max_features =features,norm='l2',sublinear_tf =True,min_df = 0.1)
-	X = cv.fit_transform(total_feature_list)#.toarray()
+		cv = TfidfVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =binary,max_features =features)#,norm='l2',sublinear_tf =True,min_df = 0.005)
+	X = cv.fit_transform(total_feature_list)
 	vocab = np.array(cv.get_feature_names())
 	print len(vocab)
-	print vocab
+	#print vocab
 	#feature_names = cv.get_feature_names()
 	y = (np.array(total_label))
 	train_test_data = [i for i in range(5)]
@@ -126,8 +126,8 @@ for i in range(1,2,1):
 	results_CV_BNB.append(1-np.mean(results_BNB['mean_test_score']))
 	"""
 	train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
+	#results_MNB = MyMultiNomialNB(train_test_data[0],train_test_data[2])
 	results_MNB = MyMultiNomialNB(train_test_data[0],train_test_data[2])
-	#results_MNB = MyBernoulliNB(train_test_data[0],train_test_data[2])
 	results_train_MNB.append(np.mean(results_MNB['mean_train_score']))
 	results_CV_MNB.append(np.mean(results_MNB['mean_test_score']))
 	

@@ -2,6 +2,8 @@ import os
 import tldextract
 import numpy as np
 import re
+import nltk
+import nltk.tokenize
 from scipy.sparse import coo_matrix
 #file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_Main_ver1.0/CODE_'
 #file_loc_out ='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_Domain_selected/CODE_'
@@ -61,7 +63,6 @@ class BuildData(object):
             #if self.code_dict[i]._article_count < 1:
             #    continue
             self.code_dict[i].FetchData(domain_select,write_output,char_limit,output_loc,self.domain_top_list)
-            print len(self.code_dict[i]._article_to_list)
             self.total_feature_location += self.code_dict[i]._article_to_list
             self.total_label   += self.code_dict[i]._label 
         data.append(self.total_feature_location)
@@ -128,12 +129,22 @@ class DataPreprocessor(object):
                         f1 = open(file_to_read,'r')
                         label = f1.readline()
                         #self._label.append(int(label))
-                        temp = [20,18,13]
+                        temp = [20,13,18,15,19]
                         if self._code in temp:
                             self._label.append(0)
                         else:
                             self._label.append(1)
                         data = f1.read()
+                        #Removing verbs from the data
+                        """
+                        word_tokens=nltk.word_tokenize(data)
+                        word_pos=nltk.pos_tag(word_tokens)
+                        temp_data=""
+                        for ele in word_pos:
+                            if "v" in ele[1].lower():
+                                temp_data+=str(ele[0])+" "
+                        """
+
                         letters_only = re.sub("[^a-zA-Z]", " ", data) 
                         self._article_to_list.append(letters_only)
         except IOError as err:
