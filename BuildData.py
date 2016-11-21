@@ -31,7 +31,7 @@ class BuildData(object):
     def extract_data_routines(self):
         #Required inputs are file location and code for doing Domain analysis
         
-        for i in range(1,21,1):  
+        for i in range(1,3,1):  
             code = i
             self.code_dict[i] = DataPreprocessor(self._file_loc,code)
             self.code_dict[i].count_domain_names()
@@ -39,7 +39,7 @@ class BuildData(object):
         #print 'Total Article count across all classes: ' + str(self.total_article_count)
 
         # collecting domain names accross all classes
-        for i in range(1,21,1):
+        for i in range(1,3,1):
         #for i in range(8,10,1):
             if len(self.code_dict[i]._domain_count) == 0:
                 continue
@@ -59,7 +59,7 @@ class BuildData(object):
     
     def fetch_train_test_data(self,domain_select,write_output,char_limit,output_loc): 
         data = []
-        for i in range(1,21,1):
+        for i in range(1,3,1):
             #if self.code_dict[i]._article_count < 1:
             #    continue
             self.code_dict[i].FetchData(domain_select,write_output,char_limit,output_loc,self.domain_top_list)
@@ -129,8 +129,7 @@ class DataPreprocessor(object):
                         f1 = open(file_to_read,'r')
                         label = f1.readline()
                         #self._label.append(int(label))
-                        temp = [20,13,18,15,19]
-                        if self._code in temp:
+                        if self._code ==1:
                             self._label.append(0)
                         else:
                             self._label.append(1)

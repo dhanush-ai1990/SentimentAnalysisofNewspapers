@@ -76,6 +76,7 @@ y = (np.array(total_label))
 clf = MultinomialNB(alpha = 0.00001)
 #clf1 = svm.SVC(kernel='linear',C =0.1)
 clf.fit(X, y)
+
 #clf1.fit(X, y)
 Reddit_articles =[]
 red_loc = '/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_reddit/CODE_1'
