@@ -23,10 +23,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
 import gc
 from sklearn import svm
+from sklearn import preprocessing
 
 
-file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_test/CODE_'
-file_loc_out ='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_Domain_selected/CODE_'
+file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_train/CODE_'
+file_loc_out ='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_domain_selected/CODE_'
+
 
 def data_extract_using_parms(Domain_select,write_output,characters_limit,output_loc,features):
 	build_data_source =  BuildData(file_loc)
@@ -41,13 +43,14 @@ def Vectorize_split(total_feature_list,total_label,features,binary):
 	if features == 'max':
 		cv = CountVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =binary)#,non_negative=True)#,max_features =75000)
 	else:
-		cv = CountVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =binary,max_features =features)
-	X = cv.fit_transform(total_feature_list)#.toarray()
+		cv = TfidfVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =binary,max_features =features,norm='l2',sublinear_tf =True,min_df = 0.005)	
+	X = cv.fit_transform(total_feature_list).toarray()
 	vocab = np.array(cv.get_feature_names())
 	#feature_names = cv.get_feature_names()
 	y = (np.array(total_label))
 	train_test_data = [i for i in range(5)]
 	#X_train, X_test, y_train, y_test = train_test_split(X,y ,test_size=0.2, random_state=5677)
+	X = preprocessing.scale(X)
 	train_test_data[0] = X
 	train_test_data[2] = y
 	#train_test_data[0],train_test_data[1],train_test_data[2],train_test_data[3] = train_test_split(X,y ,test_size=0.2, random_state=5677)
@@ -83,10 +86,9 @@ def MyGaussianNB(X_train, y_train):
 def Mylinear_svm(X_train, y_train):
 	linear_svc = svm.SVC(kernel='linear')#,decision_function_shape ='ovo'/'ovr'
 	#param_grid = {'C': np.logspace(-3, 2, 6)}
-	param_grid = {'C': [ 0.01, 0.1, 1.0 ,10.0, 100.0]}
-	classifier= GridSearchCV(estimator=linear_svc, cv=10 ,param_grid=param_grid)
+	param_grid = {'C': [ 0.1]}
+	classifier= GridSearchCV(estimator=linear_svc, cv=3 ,param_grid=param_grid)
 	y_train= np.array(y_train)
-	print y_train
 	classifier.fit(X_train, y_train)
 	return classifier.cv_results_
 
@@ -103,32 +105,31 @@ gc.enable()
 #Varying Character limit and Document count and study Variance and Biasis
 Domain_select = 0
 write_output = 0
-characters_limit = 10
+characters_limit = 5000
 Document_count = []
 character_count =[]
 results_LSVM = []
 results_train_LSVM =[]
 results_CV_LSVM = []
 feature_count = []
-features = 5000
+features = 500
 data=data_extract_using_parms(Domain_select,write_output,characters_limit,file_loc_out,features)
 total_feature_list = data[0]
 total_label = data[1]
 train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
 max_features =train_test_data[4]
 print max_features
-for i in range(1,3,1):
+for i in range(1,2,1):
 	if features > max_features:
 		continue
 	print "Training loop: " + str(i)
 	feature_count.append(features)
-	train_test_data=Vectorize_split(total_feature_list,total_label,features,True)
+	train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
 	print "Features: " + str(train_test_data[4])
 	print "Total Docs: " + str((train_test_data[0]).shape[0])
 	results_LSVM = Mylinear_svm(train_test_data[0],train_test_data[2])
-	results_train_LSVM.append(1 - np.mean(results_LSVM['mean_train_score']))
-	results_CV_LSVM.append(1-np.mean(results_LSVM['mean_test_score']))
-	features +=5000
+	results_train_LSVM.append(np.mean(results_LSVM['mean_train_score']))
+	results_CV_LSVM.append(np.mean(results_LSVM['mean_test_score']))
 
 with PdfPages('SVM_Linear_kernal_Feature_size.pdf') as pdf:
     pl.plot(feature_count,results_train_LSVM,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
@@ -155,7 +156,7 @@ with PdfPages('MultinomialNB_Character-LIMIT_study.pdf') as pdf:
 
 print "------- Linear SVM-------------------------------------"
 #index_max_accuracy = results_CV_LSVM.index(min(results_CV_LSVM))	
-print "Maximum CV accuracy : " + str(1- min(results_CV_LSVM))
+print "Maximum CV accuracy : " + str(max(results_CV_LSVM))
 print ""
 print "Train scores: " + str(results_LSVM['mean_train_score'])
 print "CV scores: " + str(results_LSVM['mean_test_score'])

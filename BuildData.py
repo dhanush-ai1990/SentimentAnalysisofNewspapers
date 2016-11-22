@@ -2,6 +2,8 @@ import os
 import tldextract
 import numpy as np
 import re
+import nltk
+import nltk.tokenize
 from scipy.sparse import coo_matrix
 #file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_Main_ver1.0/CODE_'
 #file_loc_out ='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_Domain_selected/CODE_'
@@ -29,7 +31,7 @@ class BuildData(object):
     def extract_data_routines(self):
         #Required inputs are file location and code for doing Domain analysis
         
-        for i in range(1,21,1):  
+        for i in range(1,3,1):  
             code = i
             self.code_dict[i] = DataPreprocessor(self._file_loc,code)
             self.code_dict[i].count_domain_names()
@@ -37,7 +39,7 @@ class BuildData(object):
         #print 'Total Article count across all classes: ' + str(self.total_article_count)
 
         # collecting domain names accross all classes
-        for i in range(1,21,1):
+        for i in range(1,3,1):
         #for i in range(8,10,1):
             if len(self.code_dict[i]._domain_count) == 0:
                 continue
@@ -57,9 +59,9 @@ class BuildData(object):
     
     def fetch_train_test_data(self,domain_select,write_output,char_limit,output_loc): 
         data = []
-        for i in range(1,21,1):
-            if self.code_dict[i]._article_count < 1:
-                continue
+        for i in range(1,3,1):
+            #if self.code_dict[i]._article_count < 1:
+            #    continue
             self.code_dict[i].FetchData(domain_select,write_output,char_limit,output_loc,self.domain_top_list)
             self.total_feature_location += self.code_dict[i]._article_to_list
             self.total_label   += self.code_dict[i]._label 
@@ -94,7 +96,7 @@ class DataPreprocessor(object):
                 return
         try:
             for file in os.listdir(self._file_loc):
-                if file.endswith(".txt"):
+                if file.endswith(".csv")or file.endswith(".txt"):
                     file_to_read = self._file_loc + '/' + file 
                     f = open(file_to_read,'r')
                     num_chars = 0
@@ -108,17 +110,15 @@ class DataPreprocessor(object):
                             file_to_write = self._file_loc_out + '/_' + str(self._domain_selected_article_count)+ '.txt'
                             output = open(file_to_write, "w")
                             data = f1.read()
-                            letters_only = re.sub("[^a-zA-Z]", " ", data) 
-                            output.write(letters_only)
+                            #letters_only = re.sub("[^a-zA-Z]", " ", data) 
+                            output.write(data)
                             self._domain_selected_article_count +=1
-                            self._article_to_list.append(letters_only)
+                            self._article_to_list.append(data)
 
                     elif (flag == 1 and towrite == 0):
                         #print ext.domain
                         if ext.domain in domain_top_list:
                             f1 = open(file_to_read,'r')
-                            f1.readline()
-                            f1.readline()
                             label=f1.readline()
                             self._label.append(int(label))
                             data = f1.read()
@@ -127,13 +127,25 @@ class DataPreprocessor(object):
                             self._article_to_list.append(data)
                     else:
                         f1 = open(file_to_read,'r')
-                        f1.readline()
-                        f1.readline()
                         label = f1.readline()
-                        self._label.append(int(label))
+                        #self._label.append(int(label))
+                        if self._code ==1:
+                            self._label.append(0)
+                        else:
+                            self._label.append(1)
                         data = f1.read()
-                        #letters_only = re.sub("[^a-zA-Z]", " ", data) 
-                        self._article_to_list.append(data)
+                        #Removing verbs from the data
+                        """
+                        word_tokens=nltk.word_tokenize(data)
+                        word_pos=nltk.pos_tag(word_tokens)
+                        temp_data=""
+                        for ele in word_pos:
+                            if "v" in ele[1].lower():
+                                temp_data+=str(ele[0])+" "
+                        """
+
+                        letters_only = re.sub("[^a-zA-Z]", " ", data) 
+                        self._article_to_list.append(letters_only)
         except IOError as err:
             print 'unable to perform Fetch Operation_Codeis: %s' %(self._code)
             print format(err)
@@ -145,7 +157,7 @@ class DataPreprocessor(object):
         
         try:
             for file in os.listdir(self._file_loc):
-                if file.endswith(".txt"):
+                if file.endswith(".csv")or file.endswith(".txt"):
                     file_to_read = self._file_loc + '/' + file
                     f = open(file_to_read,'r') 
                     ext = tldextract.extract(f.readline())
