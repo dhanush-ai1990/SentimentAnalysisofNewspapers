@@ -46,8 +46,8 @@ def Vectorize_split(total_feature_list,total_label,features,binary):
 	if features == 'max':
 		cv = TfidfVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =binary)#,non_negative=True)#,max_features =75000)
 	else:
-		cv = CountVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =binary,max_features =features)#,norm='l2',sublinear_tf =True,min_df = 0.005)
-	X = cv.fit_transform(total_feature_list).toarray()
+		cv = TfidfVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,binary =binary,norm='l2',sublinear_tf =True,max_features = features)
+	X = cv.fit_transform(total_feature_list)
 	vocab = np.array(cv.get_feature_names())
 	print len(vocab)
 	#print vocab
@@ -65,7 +65,7 @@ def Vectorize_split(total_feature_list,total_label,features,binary):
 def MyMultiNomialNB(X_train, y_train):
 	clf = MultinomialNB()
 	#param_grid = {'alpha': [0.000000001,0.00000001,0.0000001,0.0000001] }
-	param_grid = {'alpha': [0.000001] }
+	param_grid = {'alpha': [0.000001,0.00001,0.0001,0.001,0.01,0.05,0.1,0.5,0.9,1.0,5,10] }
 	# Ten fold Cross Validation
 	classifier= GridSearchCV(estimator=clf, cv=10 ,param_grid=param_grid)
 	classifier.fit(X_train, y_train)
@@ -74,7 +74,7 @@ def MyMultiNomialNB(X_train, y_train):
 def MyBernoulliNB(X_train, y_train):
 	clf = BernoulliNB()
 	#param_grid = {'alpha': [0.000000001,0.00000001,0.0000001,0.0000001]}
-	param_grid = {'alpha': [0.00001] }
+	param_grid = {'alpha': [0.000001,0.00001,0.0001,0.001,0.01,0.05,0.1,0.5,0.9,1.0,5,10] }
 	# Ten fold Cross Validation
 	classifier= GridSearchCV(estimator=clf, cv=10 ,param_grid=param_grid)
 	classifier.fit(X_train, y_train)
@@ -105,18 +105,21 @@ results_train_GNB = []
 results_CV_BNB = []
 results_train_BNB = []
 feature_count = []
+min_df_count =[]
+max_df_count =[]
 features = 'max'
 data=data_extract_using_parms(Domain_select,write_output,characters_limit,file_loc_out,features)
 total_feature_list = data[0]
 print len(total_feature_list)
 total_label = data[1]
-train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
-max_features =train_test_data[4]
-print max_features
-features = 1000
-for i in range(1,21,1):
-	if features > max_features:
-		continue
+#train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
+#max_features =train_test_data[4]
+#print max_features
+features = 1500
+min_df = 0.002
+max_df = 0.06
+for i in range(1,2,1):
+	print i
 	"""
 	print "Training loop: " + str(i)
 	train_test_data=Vectorize_split(total_feature_list,total_label,features,True)
@@ -125,32 +128,35 @@ for i in range(1,21,1):
 	results_train_BNB.append(1 - np.mean(results_BNB['mean_train_score']))
 	results_CV_BNB.append(1-np.mean(results_BNB['mean_test_score']))
 	"""
-	train_test_data=Vectorize_split(total_feature_list,total_label,features,False)
-	results_MNB = MyMultiNomialNB(train_test_data[0],train_test_data[2])
+	train_test_data=Vectorize_split(total_feature_list,total_label,features,True)
+	print train_test_data[4]
+	results_MNB = MyBernoulliNB(train_test_data[0],train_test_data[2])
 	results_train_MNB.append(np.mean(results_MNB['mean_train_score']))
 	results_CV_MNB.append(np.mean(results_MNB['mean_test_score']))
 	
 	#Document_count.append((train_test_data[0]).shape[0])
 	#character_count.append(characters_limit) 
 	feature_count.append(train_test_data[4])
-	features+=1000
+
+	
 
 
-print len(results_MNB['mean_train_score'])
-print "-------MultinomialNB Naive Bayes-------------------------------------"
-index_max_accuracy = results_CV_MNB.index(max(results_CV_MNB))	
+print "-------BernoulliNB Naive Bayes-------------------------------------"
 print (results_MNB['mean_test_score'])
 print (results_MNB['mean_train_score'])
-print "Feature count for max CV accuracy "    +str(feature_count[index_max_accuracy])
-
-with PdfPages('/Users/Dhanush/Desktop/MultinomialNB_Features_vs_Accuracy_Count.pdf') as pdf:
-    pl.plot(feature_count,results_train_MNB,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
-    pl.plot(feature_count,results_CV_MNB,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
+print 'features:'
+print feature_count
+alpha = [0.000001,0.00001,0.0001,0.001,0.01,0.05,0.1,0.5,0.9,1.0,5,10]
+print alpha
+"""
+with PdfPages('/Users/Dhanush/Desktop/MultinomianNB_max_Df_vs_Accuracy_Count.pdf') as pdf:
+    pl.plot(max_df_count,results_train_MNB,marker='.',markersize = 13.0,linewidth=2, linestyle='-', color='m',label ='Train Score')
+    pl.plot(max_df_count,results_CV_MNB,marker='.',markersize = 13.0,linewidth=1, linestyle='-', color='b',label ='CV Score')
     pl.ylabel('Classification accuracy',color='r')
-    pl.xlabel('Feature #',color='r')
-    pl.title('MultinomialNB - Features Vs Accuracy for train using CountVectorizer',color = 'r')
+    pl.xlabel('max_df',color='r')
+    pl.title('MultinomialNB max_df Vs Accuracy for train using TDIFVectorizer',color = 'r')
     pl.legend(bbox_to_anchor=(0.69, 0.57), loc=2, borderaxespad=0.)
     pdf.savefig()
     pl.close()
 
-
+"""

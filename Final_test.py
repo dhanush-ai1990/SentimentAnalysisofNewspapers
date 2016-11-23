@@ -36,11 +36,18 @@ import re
 import nltk
 import nltk.tokenize
 from scipy.sparse import coo_matrix
-
-file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_train/CODE_'
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn import linear_model
+import pickle
+from sklearn.externals import joblib
+file_loc='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_Final/Train/CODE_'
+file_loc1='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_Final/Test/CODE_'
 file_loc_out ='/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_domain_selected/CODE_'
 
-def data_extract_using_parms(Domain_select,write_output,characters_limit,output_loc,features):
+def data_extract_using_parms(Domain_select,write_output,characters_limit,output_loc,features,file_loc):
 	build_data_source =  BuildData(file_loc)
 	build_data_source.extract_data_routines()
 	data = build_data_source.fetch_train_test_data(Domain_select,write_output,characters_limit,output_loc)
@@ -63,23 +70,47 @@ results_CV_BNB = []
 results_train_BNB = []
 feature_count = []
 features = 'max'
-data=data_extract_using_parms(Domain_select,write_output,characters_limit,file_loc_out,features)
+"""
+data=data_extract_using_parms(Domain_select,write_output,characters_limit,file_loc_out,features,file_loc)
 total_feature_list = data[0]
 total_label = data[1]
 print len(total_feature_list)
-features = 5000
+features = 1500
+
 cv = TfidfVectorizer(input ='total_feature_list',stop_words = {'english'},lowercase=True,analyzer ='word',binary =False,max_features =features)
-X = cv.fit_transform(total_feature_list)
+X = cv.fit_transform(total_feature_list).toarray()
 vocab = np.array(cv.get_feature_names())
-print len(vocab)
+print "Vocabulary length: " + str(len(vocab))
+print "Training size: "     + str(len(total_label)) 
 y = (np.array(total_label))
-clf = MultinomialNB(alpha = 0.00001)
+#clf = DecisionTreeClassifier(min_samples_split=2,random_state=0,max_depth =100)
+clf = RandomForestClassifier(n_estimators =70)
+#clf=linear_model.LogisticRegression(solver="sag",max_iter=1000,C=1500)
 #clf1 = svm.SVC(kernel='linear',C =0.1)
 clf.fit(X, y)
 
+joblib.dump(clf, 'randomforests.pkl')
+joblib.dump(cv, 'tdif.pkl')
+"""
+clf = joblib.load('randomforests.pkl') 
+cv =joblib.load('tdif.pkl') 
+print "loaded"
+data=data_extract_using_parms(Domain_select,write_output,characters_limit,file_loc_out,features,file_loc1)
+total_feature_list = data[0]
+X = cv.transform(total_feature_list)
+total_label = data[1]
+print "Test size: "     + str(len(total_label)) 
+y = (np.array(total_label))
+out =clf.predict(X)
+print "Accuracy:" +str(accuracy_score(y,out))
+print "F1 score: "+str(f1_score(y,out, average='macro'))
+print "Percision: " + str(precision_score(y,out, average='macro'))
+print "Recall: " +str(recall_score(y,out, average='macro'))
+
+
 #clf1.fit(X, y)
 Reddit_articles =[]
-red_loc = '/Users/Dhanush/Desktop/Projects/DM_project/DMProj_Data/Data_reddit/CODE_1'
+red_loc = '/Users/Dhanush/Desktop/test'
 for file in os.listdir(red_loc):
     if file.endswith(".csv")or file.endswith(".txt"):
         file_to_read = red_loc + '/' + file 
@@ -88,24 +119,9 @@ for file in os.listdir(red_loc):
     	letters_only = re.sub("[^a-zA-Z]", " ", data) 
         Reddit_articles.append(letters_only)
 
-article=Article("http://www.mirror.co.uk/news/uk-news/detectives-launch-murder-investigation-after-9282103")
-article.download()
-article.parse()
-text=article.text.encode("utf-8")
-text =[r"A woman was raped multiple times by a masked man. She suffered horrible injuries. police investigating the case"]
 X = cv.transform(Reddit_articles)
+print X
 out =clf.predict(X)
-#out1 =clf1.fit(X, y)
-"""
-check = []
-
-for i in range(len(out)):
-	if out[i] = out1[i]:
-		check.append['M']
-	else:
-		check.append['N']
-"""
-
-
+print out
 
 
