@@ -1,0 +1,216 @@
+Multinomial naive Bayes
+-----------------------
+
+	Domain Selection - Done
+	Variation of Size of Document and no of characters per document
+	Results
+	-------
+	Maximum CV accuracy : 0.630786086004
+	character_count for max CV accuracy: 4000
+	Document_count for max CV accuracy: 7302
+
+	Domain Selction _ Not Done
+
+
+	Domain_selection _ not Done
+	Results:
+	--------
+	Maximum CV accuracy : 0.620746460746
+	character_count for max CV accuracy: 5000
+	Document_count for max CV accuracy: 19425
+
+	Conclusion, we are not getting a significant increase in performance and also we want our model to generalise on any domain articles and any size of characters. Therefore these experiments are discarded.
+------------------------------------------------------------------------------------
+Bernoulli NB
+
+	Domain Selection Done:
+	Results:
+	--------
+	Maximum CV accuracy : 0.560188989318
+	character_count for max CV accuracy: 4000
+	Document_count for max CV accuracy: 7302
+
+	Domain Selection - Not Done
+	Results:
+	-------
+	Maximum CV accuracy : 0.632771662259
+	character_count for max CV accuracy: 5500
+	Document_count for max CV accuracy: 16261
+
+	TDIF Vectorizer below
+
+Desired Feature Count 195000
+------- Multinomial Naive Bayes-------------------------------------
+Maximum CV accuracy : 0.569586278484
+Maximum Train accuracy: 0.793246323348
+Feature count for max CV accuracy 195000
+------- BernoulliNB Naive Bayes-------------------------------------
+Maximum CV accuracy : 0.52031041471
+Maximum Train accuracy: 0.721468707994
+Feature count for max CV accuracy 195000
+
+
+
+
+TDIF has better performance over CV, also from the graph selected 150000 features
+Next study Alpha
+----------------
+
+------- Multinomial Naive Bayes-------------------------------------
+Maximum CV accuracy : 0.56529089
+[ 0.56529089  0.5603381   0.54448124  0.5228313   0.4552123   0.48555188
+  0.36526123  0.33502051]
+Maximum Train accuracy: 0.78753068
+[ 0.78753068  0.77530522  0.74575981  0.70851334  0.59589077  0.64628979
+  0.45338784  0.40373134]
+Feature count for max CV accuracy 150000
+Alpha is 0.000001
+------- BernoulliNB Naive Bayes-------------------------------------
+Maximum CV accuracy : 0.52113094
+[ 0.52113094  0.51029608  0.48612525  0.46070881  0.42298453  0.43496614
+  0.37808314  0.34616183]
+Maximum Train accuracy: 00.71781919
+[ 0.71781919  0.69525535  0.65070877  0.6074594   0.54400126  0.56592911
+  0.47122511  0.42481561]
+Feature count for max CV accuracy 150000
+
+
+alpha = [0.000000001,0.00000001,0.0000001,0.0000001]
+
+
+------- Multinomial Naive Bayes-------------------------------------
+[ 0.56749543  0.56636844  0.56529089  0.56529089]
+[ 0.79479125  0.79175081  0.78753068  0.78753068]
+Feature count for max CV accuracy 150000
+------- BernoulliNB Naive Bayes-------------------------------------
+[ 0.52720083  0.52481835  0.52113094  0.52113094]
+[ 0.73166042  0.72543896  0.71781919  0.71781919]
+
+# Features at 150000, Alpha at 0.00000001
+
+Gaussian Naive bayes was tuned with few data and features at 1000 
+for computational advantages.
+
+------- GaussianNB Naive Bayes-------------------------------------
+Varied features from 5000 to 10000, there doesnt seem to be an increase in accuracy
+CV SCORE
+[ 0.51669196]
+
+[ 0.89453543]
+----------------------------------------------------------------------------
+Variation of features for EM methods
+
+
+------- Decision Tree Classifier-------------------------------------
+Maximum CV accuracy : 0.49907120743
+Maximum Train accuracy: 0.915966121709
+Feature count for max CV accuracy 70
+------- RandomForestClassifier-------------------------------------
+Maximum CV accuracy : 0.521585827313
+Maximum Train accuracy: 0.948882370464
+Feature count for max CV accuracy 100
+------- Extemely Random Tree Classifier-------------------------------------
+Maximum CV accuracy : 0.520787262273
+Maximum Train accuracy: 0.949183306115
+Feature count for max CV accuracy 90
+------- AdaBoostClassifier-------------------------------------
+Maximum CV accuracy : 0.151960784314
+Maximum Train accuracy: 0.174615903431
+Feature count for max CV accuracy 100
+
+
+Adaboost was then trained for the whole data and it showed high biasis. So training it with higher complex models. Boosting with linear simple models doesnt usually give great inputs if we have so many classes to predict. 
+
+Running Algorithm by changing depth and number of estimators
+
+------------------------------------------------------------
+Decision Tree
+-------------
+Maximum CV accuracy : 
+[ 0.10320902  0.23070252  0.4509974   0.51864701  0.51864701  0.51864701
+  0.51864701  0.51864701  0.51864701  0.51864701]
+Maximum Train accuracy: 
+[ 0.11791891  0.34337942  0.80489614  0.94623819  0.94623819  0.94623819
+  0.94623819  0.94623819  0.94623819  0.94623819]
+depth = [1,5,10,25,50,75,100,500,1000,2000]
+Best Depth 25
+------- RandomForestClassifier-------------------------------------
+Maximum CV accuracy : 
+[ 0.51864701  0.52211622  0.52385082  0.54032958  0.53772767  0.52992194
+  0.54119688  0.53859497  0.55073721  0.55420642]
+Maximum Train accuracy: 
+[ 0.94233525  0.94623819  0.94623819  0.94623819  0.94623819  0.94623819
+  0.94623819  0.94623819  0.94623819  0.94623819]
+  estimators = [10,20,30,50,70,100,200,500,1000,2000,2500]
+max_estimator2000
+
+
+------- RandomForestClassifier-------------------------------------
+Maximum CV accuracy : 
+[ 0.52038161  0.51951431  0.52211622  0.52385082  0.54119688  0.53078925
+  0.53686036  0.55507372  0.54553339  0.55073721  0.5498699 ]
+Maximum Train accuracy: 
+[ 0.94494173  0.94623819  0.94623819  0.94623819  0.94623819  0.94623819
+  0.94623819  0.94623819  0.94623819  0.94623819  0.94623819]
+max_estimator 20000
+
+------- Extemely Random Tree Classifier-------------------------------------
+Maximum CV accuracy : 
+[ 0.10928014  0.37901127  0.52645273  0.51344319  0.51344319  0.51344319
+  0.51344319  0.51344319  0.51344319  0.51344319]
+Maximum Train accuracy: 
+[ 0.12180832  0.64276303  0.94623819  0.94623819  0.94623819  0.94623819
+  0.94623819  0.94623819  0.94623819  0.94623819]
+depth = [1,5,10,25,50,75,100,500,1000,2000]
+max Depth : 10 - selected
+
+
+------- Extemely Random Tree Classifier-------------------------------------
+Maximum CV accuracy : 
+[ 0.52645273  0.53252385  0.54032958  0.53859497]
+Maximum Train accuracy: 
+[ 0.94623819  0.94623819  0.94623819  0.94623819]
+max_estimator30
+------- AdaBoostClassifier-------------------------------------
+Maximum CV accuracy : 
+[ 0.10667823  0.11274935  0.10060711  0.09973981  0.12315698  0.12142238
+  0.15784909  0.26366002  0.33564614  0.38421509  0.31222897]
+Maximum Train accuracy: 
+[ 0.13711608  0.14924749  0.15148216  0.16763887  0.18211136  0.17734041
+  0.24216015  0.42581685  0.54063715
+ estimators = [10,20,30,50,70,100,200,500,1000,2000,5000]
+
+ Best estimator between 2000 50000
+
+ Decision tree 
+
+ Fine Tuning Adaboost 
+ --------------------------------------
+estimators = [10,20,30,50,70,100,200,500,1000,2000,2500]
+
+depth = 3 , learning rate 0.5
+
+Maximum CV accuracy : 
+[ 0.16912402  0.21162186  0.26712923  0.35993062  0.39115351  0.43191674
+  0.48048569  0.51084128  0.51344319  0.51257589  0.51257589]
+Maximum Train accuracy: 
+[ 0.25366728  0.38554443  0.48660371  0.61700941  0.69123429  0.74796188
+  0.84601096  0.88594001  0.90282323  0.89982233  0.90544895]
+max_estimator1000
+
+depth = 4, learning rate 0.5
+
+Maximum CV accuracy : 
+[ 0.28620989  0.3876843   0.46660885  0.49869905  0.50997398  0.52471813
+  0.52124892  0.53252385  0.54119688  0.52732003  0.53339115]
+Maximum Train accuracy: 
+[ 0.50899043  0.7223898   0.83134538  0.88460507  0.91284685  0.93365909
+  0.93368285  0.93626893  0.93844812  0.93670632  0.93628246]
+max_estimator1000
+
+depth = 10
+
+Maximum CV accuracy : 
+[ 0.547268    0.54293148  0.54379879]
+Maximum Train accuracy: 
+[ 0.94493269  0.94233977  0.94407705]

@@ -1,0 +1,147 @@
+Bernoulli, features 90k
+
+80 -20
+
+train accuracy:0.81272370396
+test accuracy:0.593721144968,
+
+
+50 - 50
+
+
+train accuracy:0.81272370396
+test accuracy:0.593721144968
+
+
+features 30k
+
+
+80 - 20
+
+train accuracy:0.752222607089
+test accuracy:0.555863342567
+
+
+50 -50
+
+train accuracy:0.799741363384
+test accuracy:0.528629479128
+
+
+features 60K
+
+
+80 - 20
+
+train accuracy:0.797598429743
+test accuracy:0.589566020314
+
+
+50 - 50
+
+train accuracy:0.836689451321
+test accuracy:0.543221278168
+
+features 75k
+
+train accuracy:0.807412538968
+test accuracy:0.592336103416
+
+
+Multionomial
+
+alpha 0.01
+----------
+
+train accuracy:0.864911673017
+test accuracy:0.65189289012
+
+
+alpha 0.001
+
+train accuracy:0.882923449948
+test accuracy:0.664358264081
+
+
+alpha 0.0001
+
+train accuracy:0.892506638956
+test accuracy:0.664819944598
+
+alpha 0.5 
+
+train accuracy:0.79147904399
+test accuracy:0.601108033241
+
+alpha 0.000001  ( 60 - 40)
+
+train accuracy:0.920566502463
+test accuracy:0.612329716001
+
+
+alpha 0.000001 ( 80 - 20)
+
+train accuracy:0.902089827964
+test accuracy:0.668975069252
+
+alpha 0.000001 ( 80 - 20), features 55k
+
+train accuracy:0.895739521995
+test accuracy:0.666666666667
+
+
+alpha 0.000001 ( 80 - 20), features 40k
+
+train accuracy:0.887541854289
+test accuracy:0.662511542013
+
+alpha 0.000001 ( 80 - 20), features 75k
+
+train accuracy:0.900819766771
+test accuracy:0.668513388735
+
+Varying training data size
+----------------------------
+
+
+Characters per articles : 3500
+train accuracy:0.898320895522
+test accuracy:0.682213930348
+
+
+cheacters per articles : 4500
+
+train accuracy:0.905753709971
+test accuracy:0.67429760666
+
+Features = full, characters per article = 3500
+
+train accuracy:0.910297239915
+test accuracy:0.694267515924
+
+featurs = full, characters per article = 4500
+
+train accuracy:0.905753709971
+test accuracy:0.67429760666
+
+features = full, characters per article = 1500
+
+train accuracy:0.901663557214
+test accuracy:0.682213930348
+
+
+Effect of Domain selection, means more articles of fixed character 3500( alpha fixed, features = max, length of characters = 3500)
+
+
+train accuracy:0.886726167869
+test accuracy:0.67046317388
+
+
+
+Gaussian NB:
+
+max features
+
+
+train accuracy:0.902487656665
+test accuracy:0.667046317388

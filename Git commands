@@ -1,0 +1,8 @@
+Git commands
+git branch -a //* list branches
+git checkout branch
+git status //* status of the repository
+git ls-files
+git rm -f file_name //* delete the file name
+git commit -m "Message"
+git push --set-upstream origin Dev //Dev branch exist in local not remote

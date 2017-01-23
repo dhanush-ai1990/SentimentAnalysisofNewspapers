@@ -56,3 +56,10 @@ ENV/
 .ropeproject
 
 *.ipynb
+<<<<<<< HEAD
+=======
+
+*.pdf
+
+*.pdf
+>>>>>>> origin/master
