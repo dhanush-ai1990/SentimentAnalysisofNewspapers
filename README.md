@@ -1,4 +1,4 @@
-# SentimentAnalysisofNewspapers
+# Sentiment Analysis of Newspapers
 
 Abstract—Violence in the media is becoming more prolific than ever. Violent content in news articles is detrimental to the
 psychological growth of minors and is not appropriate for their consumption. With the availability of online material, minors
@@ -10,4 +10,4 @@ appropriate and inappropriate for minors.We work with a subset of the data from 
 the article. GDELT breaks the articles into the 20 CAMEO codes, and further into verbal cooperation and conflict and material
 cooperation and conflict that we use for classifying whether or not something is appropriate or inappropriate.
 
-Results
+Please find the attached report for more details on the project.
